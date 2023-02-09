@@ -84,4 +84,3 @@ resource "aws_ssm_parameter" "addondb_name" {
 }
 
 
- }
