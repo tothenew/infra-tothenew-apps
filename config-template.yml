@@ -159,7 +159,7 @@ workspaces:
     
     rabbit_addons:
        queue_list: ["queue_one","queue_two"]
-       exchange_list: ["exchange_one","exchange_two"
+       exchange_list: ["exchange_one","exchange_two"]
 
     monitoring:
       namespace: "monitoring"
@@ -171,7 +171,7 @@ workspaces:
      instance_type: "m5a.large"
      
     ecr:
-      repo_names: ["ecr_repo1,"ecr_repo2"]
+      repo_names: ["ecr_repo1","ecr_repo2"]
 
     cdn:
       s3_origin_id: "s3_origin_id"
