@@ -152,15 +152,6 @@ workspaces:
     kms_policy:
       role_name: "role-attached-to-tf-instance"
 
-    mysql_addons:
-      app_user_names: ["user1","user2","user3"]
-      addondb_name: "prj_db"
-
-    
-    rabbit_addons:
-       queue_list: ["queue_one","queue_two"]
-       exchange_list: ["exchange_one","exchange_two"]
-
     monitoring:
       namespace: "monitoring"
       version: "36.2.0"
@@ -169,16 +160,3 @@ workspaces:
     efk:
      ami_id: "ami-0a606d8395a538502" #amzn linux2 image
      instance_type: "m5a.large"
-     
-    ecr:
-      repo_names: ["ecr_repo1","ecr_repo2"]
-
-    cdn:
-      s3_origin_id: "s3_origin_id"
-    cache:
-      redis:
-        failover: "true"
-        availability_zones: ["us-east-2b","us-east-2a"]
-        clusters: "2"
-        node_type: "cache.r4.large"
-        cluster_version: "3.2.10"  
