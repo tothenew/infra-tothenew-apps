@@ -1,7 +1,7 @@
 data "aws_vpc" "selected" {
   filter {
     name   = "tag:Name"
-    values = ["demorun"]
+    values = ["${local.workspace.account_name}-${local.workspace.aws.region}-${local.workspace.project_name}"]
   }
 }
 

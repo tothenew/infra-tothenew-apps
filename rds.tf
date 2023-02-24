@@ -5,7 +5,7 @@ module "create_database" {
   subnet_ids = data.aws_subnets.secure.ids
   vpc_id           = data.aws_vpc.selected.id
   vpc_cidr         = [data.aws_vpc.selected.cidr_block]
-  db_subnet_group_id = "${local.workspace.project_name}-${local.workspace.environment_name}-${local.workspace["rds"]["db_subnet_group_id"]}"
+  db_subnet_group_id = "${local.workspace.project_name}-${local.workspace.environment_name}-dbsubnet-group"
   publicly_accessible = false
   project_name_prefix = "${local.workspace.project_name}-${local.workspace.environment_name}-rds-cluster"
   allocated_storage = local.workspace["rds"]["allocated_storage"]
@@ -24,26 +24,7 @@ module "create_database" {
   count_aurora_instances = 1
   serverlessv2_scaling_configuration_max = local.workspace.rds.serverlessv2_scaling_configuration_max
   serverlessv2_scaling_configuration_min = local.workspace.rds.serverlessv2_scaling_configuration_min
-  environment = local.workspace["rds"]["environment"]
+  environment = local.workspace["environment_name"]
   common_tags = local.tags
 }
-#resource "aws_kms_key" "rds_key" {
-#  description             = local.workspace.rds.kms_key_desc
-#  key_usage               = "ENCRYPT_DECRYPT"
-  #policy                  = "${data.template_file.kms.rendered}"
-#  deletion_window_in_days = local.workspace.rds.deletion_window_in_days
-#  is_enabled              = true
-#  enable_key_rotation     = false
-
- # tags = {
- #   "Project"     = local.workspace.project_name
- #   "ManagedBy"   = "Terraform"
- #   "Environment" = local.workspace.environment_name
- # }
-#}
-
-#resource "aws_kms_alias" "rds_key_alias" {
-#  name          = "alias/rds-${local.workspace.environment_name}-${local.workspace.project_name}"
-#  target_key_id = aws_kms_key.rds_key.id
-#}
 
