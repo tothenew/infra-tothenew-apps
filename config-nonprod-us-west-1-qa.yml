@@ -84,4 +84,7 @@ workspaces:
     #Update name for s3 bucket
     s3:
       name: "social-backup"
-
+    
+    #Update app db name
+    mysql_addons:
+      appdb_name: "newdb"
