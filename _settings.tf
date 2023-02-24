@@ -1,8 +1,8 @@
 terraform {
   backend "s3" {
-    bucket         = "test-tfstate-backend"
+    bucket         = "terraform-bakcend-demorun"
     key            = "prj/main.tf"
-    region         = "us-west-1"
+    region         = "eu-central-1"
     encrypt        = true
   
   }

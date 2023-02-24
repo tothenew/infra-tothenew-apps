@@ -17,7 +17,7 @@ module "create_database" {
   username   = "root"
   apply_immediately = false
 #  storage_encrypted = local.workspace["rds"]["storage_encrypted"]
-  kms_key_arn = aws_kms_key.rds_key.arn
+ # kms_key_arn = aws_kms_key.rds_key.arn
   multi_az = false
   deletion_protection = false
   auto_minor_version_upgrade = false
@@ -27,23 +27,23 @@ module "create_database" {
   environment = local.workspace["rds"]["environment"]
   common_tags = local.tags
 }
-resource "aws_kms_key" "rds_key" {
-  description             = local.workspace.rds.kms_key_desc
-  key_usage               = "ENCRYPT_DECRYPT"
-  policy                  = "${data.template_file.kms.rendered}"
-  deletion_window_in_days = local.workspace.rds.deletion_window_in_days
-  is_enabled              = true
-  enable_key_rotation     = false
+#resource "aws_kms_key" "rds_key" {
+#  description             = local.workspace.rds.kms_key_desc
+#  key_usage               = "ENCRYPT_DECRYPT"
+  #policy                  = "${data.template_file.kms.rendered}"
+#  deletion_window_in_days = local.workspace.rds.deletion_window_in_days
+#  is_enabled              = true
+#  enable_key_rotation     = false
 
-  tags = {
-    "Project"     = local.workspace.project_name
-    "ManagedBy"   = "Terraform"
-    "Environment" = local.workspace.environment_name
-  }
-}
+ # tags = {
+ #   "Project"     = local.workspace.project_name
+ #   "ManagedBy"   = "Terraform"
+ #   "Environment" = local.workspace.environment_name
+ # }
+#}
 
-resource "aws_kms_alias" "rds_key_alias" {
-  name          = "alias/rds-${local.workspace.environment_name}-${local.workspace.project_name}"
-  target_key_id = aws_kms_key.rds_key.id
-}
+#resource "aws_kms_alias" "rds_key_alias" {
+#  name          = "alias/rds-${local.workspace.environment_name}-${local.workspace.project_name}"
+#  target_key_id = aws_kms_key.rds_key.id
+#}
 

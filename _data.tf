@@ -1,14 +1,14 @@
 data "aws_vpc" "selected" {
   filter {
     name   = "tag:Name"
-    values = ["testnonprod"]
+    values = ["demorun"]
   }
 }
 
 data "aws_subnets" "public" {
   filter {
-    name   = "tag:Name"
-    values = ["testnonprod-public*"]
+    name   = "tag:Scope"
+    values = ["public"]
   }
   filter {
     name   = "vpc-id"
@@ -18,8 +18,8 @@ data "aws_subnets" "public" {
 
 data "aws_subnets" "private" {
   filter {
-    name   = "tag:Name"
-    values = ["testnonprod-private*"]
+    name   = "tag:Scope"
+    values = ["private"]
   }
   filter {
     name   = "vpc-id"
@@ -29,8 +29,8 @@ data "aws_subnets" "private" {
 
 data "aws_subnets" "secure" {
   filter {
-    name   = "tag:Name"
-    values = ["testnonprod-database*"]
+    name   = "tag:Scope"
+    values = ["database"]
   }
   filter {
     name   = "vpc-id"
@@ -38,21 +38,7 @@ data "aws_subnets" "secure" {
   }
 }
 
-data "aws_ami" "jumpbox" {
-    most_recent = true
 
-    filter {
-        name   = "name"
-        values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
-    }
-
-    filter {
-        name   = "virtualization-type"
-        values = ["hvm"]
-    }
-
-    owners = ["099720109477"] 
-}
 
 resource "aws_ec2_tag" "public_sub" {
   for_each    = toset(data.aws_subnets.public.ids)
