@@ -1,0 +1,90 @@
+workspaces:
+  nonprod-us-west-1-qa:
+    aws:
+      # Update Roles and Region
+      role: nonprod-us-west-1-tothenew-infra-deploy-access-role
+      account_id: 750939590519
+      region: us-west-1
+    account_name: nonprod
+    project_name: tothenew # update client name here
+    environment_name: qa
+    # EKS Cluster Setup
+    eks_cluster:
+      name: "social" # Project Name
+      version: "1.24"
+      min_size: 3
+      desired_size: 3
+      max_size: 12
+      version: "1.24"
+      instance_type: "m5a.xlarge"
+      is_mixed_instance_policy: false
+      http_token_option: "optional"
+      addons:
+        aws-ebs-csi-driver:
+          resolve_conflicts: "OVERWRITE"
+        vpc-cni:
+          resolve_conflicts: "OVERWRITE"
+      override:
+      - instance_type: "m5a.xlarge"
+        weighted_capacity: "1"
+      - instance_type: "m5a.large"
+        weighted_capacity: "2"
+      instances_distribution:
+        on_demand_base_capacity: 0
+        on_demand_percentage_above_base_capacity: 20
+        spot_allocation_strategy: "capacity-optimized"
+      instances_distribution_override:
+        - instance_type: "t2.medium"
+          weighted_capacity: 1
+        - instance_type: "t3.medium"
+          weighted_capacity: 1
+        - instance_type: "t3.large"
+          weighted_capacity: 2
+      secrets-store-csi:
+        enableSecretRotation: true
+        syncSecretEnabled: true
+        chart_version: "1.2.4"
+        ascp_chart_version: "0.0.3"
+      argocd:
+        namespace: "argocd"
+        version: "5.16.1"
+        repository: "https://argoproj.github.io/argo-helm"
+        chart_name: "argo-cd"
+    # Enable or Disable this section for    
+    monitoring:
+      namespace: "monitoring"
+      version: "36.2.0"
+      stack_name: "kube-prometheus-stackr"   
+
+    #Update/Add RDS/Auroa configuration parameters
+    rds:
+      engine: "aurora-mysql"
+      instance_class: "db.serverless"
+      parameter_group_name: "default.aurora-mysql5.7"
+      db_name: "social"
+      engine_version: "8.0.mysql_aurora.3.02.0"
+      serverlessv2_scaling_configuration_max: 10
+      serverlessv2_scaling_configuration_min: 4
+      allocated_storage: 100
+      storage_encrypted: true
+      deletion_window_in_days: 7
+
+    #Update/Add elasticsearch configuration parameters
+    elasticsearch:
+      instance_count: 2
+      instance_type: "m5a.large"
+      volume_size: 100
+      volume_type: "gp2"
+      iam_instance_profile: "elasticsearch"
+      cloudwatch_logs_retention: 7
+      vpc_cidr: "10.1.0.0/16"
+      deletion_window_in_days: 7
+
+
+    #Update name for s3 bucket
+    s3:
+      name: "social-backup"
+    
+    #Update app db name
+    mysql_addons:
+      appdb_name: "newdb"

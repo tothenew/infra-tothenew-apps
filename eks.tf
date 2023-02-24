@@ -7,7 +7,7 @@ provider "kubernetes" {
   exec {
     api_version = "client.authentication.k8s.io/v1beta1"
     command     = "aws"
-    args = ["eks", "get-token", "--cluster-name", local.workspace.eks_cluster.name]
+    args = ["eks", "get-token", "--cluster-name", local.workspace.eks_cluster.name,"--role-arn" ,"arn:aws:iam::${local.workspace.aws.account_id}:role/${local.workspace.aws.role}" ]
   }
 }
 
@@ -18,7 +18,7 @@ provider "helm" {
     exec {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
-      args = ["eks", "get-token", "--cluster-name", local.workspace.eks_cluster.name]
+      args = ["eks", "get-token", "--cluster-name", local.workspace.eks_cluster.name,"--role-arn" ,"arn:aws:iam::${local.workspace.aws.account_id}:role/${local.workspace.aws.role}" ]
     }
   }
 }
@@ -57,7 +57,28 @@ module "eks_cluster" {
   }
   
   #Cluter Addition Security groups rules
-  cluster_security_group_additional_rules = local.workspace.eks_cluster.cluster_security_group
+  cluster_security_group_additional_rules =  {
+      "cluster_rule_egress" = {
+        "cidr_blocks" = [
+          "10.1.0.0/16",
+        ]
+        "description" = "outbound vpc"
+        "from_port" = 0
+        "protocol" = "-1"
+        "to_port" = 65535
+        "type" = "egress"
+      }
+      "cluster_rule_ingress" = {
+        "cidr_blocks" = [
+          local.common.vpc_cidr,
+        ]
+        "description" = "inbound vpc"
+        "from_port" = 0
+        "protocol" = "tcp"
+        "to_port" = 65535
+        "type" = "ingress"
+      }
+    }
 
   self_managed_node_groups = {
     # Default node group - as provisioned by the module defaults
@@ -76,7 +97,28 @@ module "eks_cluster" {
       security_group_name            = local.workspace.eks_cluster.name
       security_group_use_name_prefix = true
       security_group_description     = "Self managed NodeGroup SG"
-      security_group_rules = local.workspace.eks_cluster.node_security_group
+      security_group_rules = {
+      "node_rules_egress" = {
+        "cidr_blocks" = [
+          "0.0.0.0/0",
+        ]
+        "description" = "outbound vpc"
+        "from_port" = 0
+        "protocol" = "-1"
+        "to_port" = 65535
+        "type" = "egress"
+      }
+      "node_rules_ingress" = {
+        "cidr_blocks" = [
+          local.common.vpc_cidr,
+        ]
+        "description" = "inbound vpc"
+        "from_port" = 0
+        "protocol" = "tcp"
+        "to_port" = 65535
+        "type" = "ingress"
+      }
+    }
 }
   
     mixed = {
@@ -94,7 +136,28 @@ module "eks_cluster" {
       security_group_name            = local.workspace.eks_cluster.name
       security_group_use_name_prefix = true
       security_group_description     = "Self managed NodeGroup SG"
-      security_group_rules = local.workspace.eks_cluster.node_security_group
+      security_group_rules = {
+      "node_rules_egress" = {
+        "cidr_blocks" = [
+          "0.0.0.0/0",
+        ]
+        "description" = "outbound vpc"
+        "from_port" = 0
+        "protocol" = "-1"
+        "to_port" = 65535
+        "type" = "egress"
+      }
+      "node_rules_ingress" = {
+        "cidr_blocks" = [
+          local.common.vpc_cidr,
+        ]
+        "description" = "inbound vpc"
+        "from_port" = 0
+        "protocol" = "tcp"
+        "to_port" = 65535
+        "type" = "ingress"
+      }
+    }
 
 
       pre_bootstrap_user_data = <<-EOT
@@ -116,7 +179,19 @@ module "eks_cluster" {
      iam_role_additional_policies = [
       "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
       ]
-      block_device_mappings = "${local.workspace.eks_cluster.block_device_mappings}"
+      block_device_mappings = {
+  "xvda" = {
+    "device_name" = "/dev/xvda"
+    "ebs" = {
+      "delete_on_termination" = true
+      "encrypted" = true
+      "iops" = 3000
+      "throughput" = 150
+      "volume_size" = 50
+      "volume_type" = "gp3"
+    }
+  }
+}
       use_mixed_instances_policy = "${local.workspace.eks_cluster.is_mixed_instance_policy}"
       mixed_instances_policy = {
         instances_distribution = "${local.workspace.eks_cluster.instances_distribution}"
@@ -142,33 +217,6 @@ module "node_termination_handler" {
  source = "git::https://github.com/tothenew/terraform-aws-eks.git//modules/terraform-aws-eks-node-termination-handler"
 }
 
-//Ingress Security Group
-resource "aws_security_group" "allow_tls" {
-  name        = "${local.workspace.project_name}-${local.workspace.environment_name}-${local.workspace.eks_cluster.ingress_sg_name}"
-  description = "Ingress SG"
-  vpc_id      = data.aws_vpc.selected.id
-
-  ingress {
-    description      = "To accept the public traffic"
-    from_port        = 443
-    to_port          = 443
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-  }
-  ingress {
-    description      = "To accept the public traffic"
-    from_port        = 80
-    to_port          = 80
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-  }
-  egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = -1
-    cidr_blocks      = ["0.0.0.0/0"]
-  }
-}
 
 module "helm_iam_policy" {
   source  = "git::https://github.com/terraform-aws-modules/terraform-aws-iam.git//modules/iam-policy"
@@ -241,7 +289,7 @@ module "secrets-store-csi" {
   ascp_chart_version = local.workspace.eks_cluster.secrets-store-csi.ascp_chart_version
   syncSecretEnabled = local.workspace.eks_cluster.secrets-store-csi.syncSecretEnabled
   enableSecretRotation = local.workspace.eks_cluster.secrets-store-csi.enableSecretRotation
-  namespace_service_accounts = ["${local.workspace.environment_name}:api-provider-service-service-role","${local.workspace.environment_name}:core-service-service-role","${local.workspace.environment_name}:gateway-service-service-role","${local.workspace.environment_name}:content-service-service-role","${local.workspace.environment_name}:editorial-service-service-role","${local.workspace.environment_name}:subscriber-management-service-role","${local.workspace.environment_name}:application-ingestor-service-role","${local.workspace.environment_name}:application-search-service-service-role","${local.workspace.environment_name}:frontend-cms-service-role","${local.workspace.environment_name}:videoready-config-service-role","${local.workspace.environment_name}:producer-service-service-role"]
+  namespace_service_accounts = ["${local.workspace.environment_name}:user-service-app-service-role","${local.workspace.environment_name}:nginx-app-service-role"]
 }
 resource "aws_iam_role_policy_attachment" "secrets_integration_policy_attachment" {
   depends_on = [

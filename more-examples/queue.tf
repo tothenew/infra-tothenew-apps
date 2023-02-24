@@ -9,7 +9,7 @@ module "message_queue" {
   worker  = 0
   master  = 1
   key_name = local.workspace["key_name"]
-  kms_key_id = aws_kms_key.queue_key.arn
+  kms_key_id = "arn:aws:kms:eu-central-1:454578700264:key/a5174342-81ec-4788-9b45-1f49280c4bd4"
   instance_type = local.workspace["queue"]["instance_type"]
   disable_api_termination = true
   disable_api_stop        = false
@@ -18,23 +18,4 @@ module "message_queue" {
   environment_name = local.workspace.environment_name
   region = local.workspace["aws"]["region"]
   project_name_prefix = "TTN"
-}
-resource "aws_kms_key" "queue_key" {
-  description             = local.workspace.queue.kms_key_desc
-  key_usage               = "ENCRYPT_DECRYPT"
-  policy                  = "${data.template_file.kms.rendered}"
-  deletion_window_in_days = local.workspace.queue.deletion_window_in_days
-  is_enabled              = true
-  enable_key_rotation     = false
-
-  tags = {
-    "Project"     = local.workspace.project_name
-    "ManagedBy"   = "Terraform"
-    "Environment" = local.workspace.environment_name
-  }
-}
-
-resource "aws_kms_alias" "queue_key_alias" {
-  name          = "alias/queue-${local.workspace.environment_name}-${local.workspace.project_name}"
-  target_key_id = aws_kms_key.queue_key.id
 }

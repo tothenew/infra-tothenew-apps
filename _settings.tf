@@ -1,8 +1,8 @@
 terraform {
   backend "s3" {
-    bucket         = "tf-prj-backend"
+    bucket         = "nonprod-us-west-1-tothenew-backend"
     key            = "prj/main.tf"
-    region         = "us-east-2"
+    region         = "us-west-1"
     encrypt        = true
   
   }
@@ -10,6 +10,10 @@ terraform {
 
 provider "aws" {
   region  = local.workspace["aws"]["region"]
+   assume_role {
+       role_arn = "arn:aws:iam::${local.workspace.aws.account_id}:role/${local.workspace.aws.role}"
+    }
+
 }
 
 terraform {
