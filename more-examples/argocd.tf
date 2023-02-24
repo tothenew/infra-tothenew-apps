@@ -1,43 +1,31 @@
-resource "helm_release" "argocd" {
-name             = "argocd"
-create_namespace = "true"
-chart            = local.workspace.eks_cluster.argocd.chart_name
-namespace        = local.workspace.eks_cluster.argocd.namespace
-version          = local.workspace.eks_cluster.argocd.version
-repository       = local.workspace.eks_cluster.argocd.repository
-# set {
-# name  = "server.service.type"
-# value = "LoadBalancer"
-# }
-set {
-name  = "server.extraArgs"
-value = "{--insecure}"
-}
-# set {
-# name  = "server.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-internal"
-# value = "true"
-# }
-  set {
-    name  = "server.ingress.enabled"
-    value = "true"
-  } 
-  set {
-    name  = "server.ingress.annotations.kubernetes\\.io/ingress\\.class"
-    value = "alb"
-  }
-  set {
-    name  = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/scheme"
-    value = "internet-facing"
-  }
-  set {
-    name  = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/target-type"
-    value = "ip"
-  }
-  set {
-    name  = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/healthcheck-protocol"
-    value = "HTTP"
-  }
-depends_on = [
-    module.eks_cluster
+module "argocd" {
+  source = "git::https://github.com/tothenew/terraform-helm-argocd.git"
+
+  enabled = true
+  helm_services = [
+    {
+      name          = "argocd"
+      chart_version = "5.16.1"
+      release_name  = "argo-cd"
+      settings = {
+        "server" = {
+          "extraArgs" = [
+              "--insecure",
+          ]
+          "ingress" = {
+            "enabled" = true
+            "https"   = true
+            "annotations" = {
+              "kubernetes.io/ingress.class"                    = "alb"
+              "alb.ingress.kubernetes.io/scheme"               = "internet-facing"
+              "alb.ingress.kubernetes.io/target-type"          = "ip"
+              "alb.ingress.kubernetes.io/success-codes"        = "200"
+              "alb.ingress.kubernetes.io/healthcheck-protocol" = "HTTP"
+              "alb.ingress.kubernetes.io/listen-ports"         = "[{\"HTTP\": 80}]"
+            }
+          }
+        }
+      }
+    }
   ]
 }
