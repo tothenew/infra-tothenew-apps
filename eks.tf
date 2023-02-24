@@ -289,7 +289,7 @@ module "secrets-store-csi" {
   ascp_chart_version = local.workspace.eks_cluster.secrets-store-csi.ascp_chart_version
   syncSecretEnabled = local.workspace.eks_cluster.secrets-store-csi.syncSecretEnabled
   enableSecretRotation = local.workspace.eks_cluster.secrets-store-csi.enableSecretRotation
-  namespace_service_accounts = ["${local.workspace.environment_name}:api-provider-service-service-role","${local.workspace.environment_name}:core-service-service-role","${local.workspace.environment_name}:gateway-service-service-role","${local.workspace.environment_name}:content-service-service-role","${local.workspace.environment_name}:editorial-service-service-role","${local.workspace.environment_name}:subscriber-management-service-role","${local.workspace.environment_name}:application-ingestor-service-role","${local.workspace.environment_name}:application-search-service-service-role","${local.workspace.environment_name}:frontend-cms-service-role","${local.workspace.environment_name}:videoready-config-service-role","${local.workspace.environment_name}:producer-service-service-role"]
+  namespace_service_accounts = ["${local.workspace.environment_name}:user-service-app-service-role","${local.workspace.environment_name}:nginx-app-service-role"]
 }
 resource "aws_iam_role_policy_attachment" "secrets_integration_policy_attachment" {
   depends_on = [

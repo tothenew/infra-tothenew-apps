@@ -1,8 +1,8 @@
 terraform {
   backend "s3" {
-    bucket         = "terraform-bakcend-demorun"
+    bucket         = "nonprod-us-west-1-tothenew-backend"
     key            = "prj/main.tf"
-    region         = "eu-central-1"
+    region         = "us-west-1"
     encrypt        = true
   
   }

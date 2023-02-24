@@ -2,8 +2,8 @@ workspaces:
   nonprod-us-west-1-qa:
     aws:
       # Update Roles and Region
-      role: demorun-infra-deploy-access-role
-      account_id: 454578700264
+      role: nonprod-us-west-1-tothenew-infra-deploy-access-role
+      account_id: 750939590519
       region: us-west-1
     account_name: nonprod
     project_name: tothenew # update client name here
