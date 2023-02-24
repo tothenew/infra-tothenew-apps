@@ -1,14 +1,14 @@
 data "aws_vpc" "selected" {
   filter {
     name   = "tag:Name"
-    values = ["prj-test1-vpc"]
+    values = ["testnonprod"]
   }
 }
 
 data "aws_subnets" "public" {
   filter {
     name   = "tag:Name"
-    values = ["prj-test1-subnet-public*"]
+    values = ["testnonprod-public*"]
   }
   filter {
     name   = "vpc-id"
@@ -19,7 +19,7 @@ data "aws_subnets" "public" {
 data "aws_subnets" "private" {
   filter {
     name   = "tag:Name"
-    values = ["prj-test1-subnet-private*"]
+    values = ["testnonprod-private*"]
   }
   filter {
     name   = "vpc-id"
@@ -30,7 +30,7 @@ data "aws_subnets" "private" {
 data "aws_subnets" "secure" {
   filter {
     name   = "tag:Name"
-    values = ["prj-test1-subnet-private*"]
+    values = ["testnonprod-database*"]
   }
   filter {
     name   = "vpc-id"
@@ -66,3 +66,4 @@ resource "aws_ec2_tag" "private_sub" {
   key         = "kubernetes.io/role/internal-elb"
   value       = "1"
 } 
+
