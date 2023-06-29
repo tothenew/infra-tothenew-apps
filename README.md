@@ -1,4 +1,5 @@
 # Pre-provisioning steps:
+
 ## Setup VPC and Terraform Server
 Using terraform from local machine/laptop
 
